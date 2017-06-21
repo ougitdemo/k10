@@ -153,7 +153,8 @@
             end = msg.indexOf(url, start);
 
             if (resolve) {
-                output += msg.substring(start, end) + '<a class="ChatBBCodeUrl" href="' + protocol + url + '" onclick="return !window.open(\'' + protocol + url + '\',\'_blank\',\'\');">' + url + "</a>";
+                var encodedHref = url.replace(/"/g, "%22");
+                output += msg.substring(start, end) + '<a class="ChatBBCodeUrl" href="' +protocol +encodedHref + '" target="_blank" rel="noopener noreferrer">' +url + "</a>";
             }
             else {
                 output += msg.substring(start, end) + url;
@@ -280,8 +281,8 @@
                     case "url":
                         if (tagobj[2] != null) {
                             if (IsValidURL(tagobj[2])) {
-                                var encodedHref = tagobj[2].replace(/"/g, "%22").replace(/'/g, "%27");
-                                resolved = '<a class="ChatBBCodeUrl" href="' + encodedHref + '" onclick="return !window.open(\'' + encodedHref + '\',\'_blank\',\'\');">';
+                                var encodedHref = tagobj[2].replace(/"/g, "%22");
+                                resolved = '<a class="ChatBBCodeUrl" href="' + encodedHref + '" target="_blank" rel="noopener noreferrer">';
                             }
                             else {
                                 resolved = tagobj[2] + " ";

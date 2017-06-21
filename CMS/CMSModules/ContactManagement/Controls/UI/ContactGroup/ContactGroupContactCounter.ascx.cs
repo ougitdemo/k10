@@ -1,10 +1,6 @@
 ﻿using System;
 
 using CMS.ContactManagement;
-
-using System.Linq;
-
-using CMS.SiteProvider;
 using CMS.UIControls;
 
 
@@ -21,18 +17,13 @@ public partial class CMSModules_ContactManagement_Controls_UI_ContactGroup_Conta
             return EditedObject as ContactGroupInfo;
         }
     }
-    
+
 
     protected void Page_PreRender(object sender, EventArgs e)
     {
         // Check that the control is included in CMSPage (otherwise an exception is thrown on the Design tab)
         var page = Page as CMSPage;
-        if (page == null)
-        {
-            return;
-        }
-
-        if (ContactGroup == null)
+        if (page == null || ContactGroup == null)
         {
             return;
         }
@@ -52,15 +43,10 @@ public partial class CMSModules_ContactManagement_Controls_UI_ContactGroup_Conta
         // Display number of contacts
         lblCount.InnerText = String.Format(GetString("om.contactgroup.numberofcontacts"), numberOfContacts);
 
-        // Display ratio only for site group, since for global it would be difficult to compute 
-        if (!ContactGroup.IsGlobal)
-        {
-            // Display ratio of the number of contacts
-            int totalContactCount = ContactInfoProvider.GetContacts()
-                                                       .Count;
+        // Display ratio of the number of contacts
+        int totalContactCount = ContactInfoProvider.GetContacts().Count;
 
-            double ratio = (totalContactCount == 0) ? 0 : (double)numberOfContacts / totalContactCount * 100;
-            lblRatio.InnerText = String.Format(GetString("om.contactgroup.numberofcontacts.ratio"), ratio);
-        }
+        double ratio = (totalContactCount == 0) ? 0 : (double)numberOfContacts / totalContactCount * 100;
+        lblRatio.InnerText = String.Format(GetString("om.contactgroup.numberofcontacts.ratio"), ratio);
     }
 }

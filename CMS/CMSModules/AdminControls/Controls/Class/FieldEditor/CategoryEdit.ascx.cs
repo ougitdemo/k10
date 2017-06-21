@@ -38,7 +38,7 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_Categor
     {
         base.OnInit(e);
 
-        txtCategoryName.IsLiveSite = IsLiveSite;
+        txtCategoryCaption.IsLiveSite = IsLiveSite;
         chkCollapsible.IsLiveSite = IsLiveSite;
         chkCollapsedByDefault.IsLiveSite = IsLiveSite;
         chkVisible.IsLiveSite = IsLiveSite;
@@ -49,14 +49,14 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_Categor
     {
         base.OnLoad(e);
 
-        FormEngineUserControl categoryNameControl = (FormEngineUserControl)txtCategoryName.NestedControl;
-        if (categoryNameControl != null)
+        FormEngineUserControl categoryCaptionControl = (FormEngineUserControl)txtCategoryCaption.NestedControl;
+        if (categoryCaptionControl != null)
         {
             // Disable autosave on LocalizableTextBox controls
-            categoryNameControl.SetValue("AutoSave", false);
+            categoryCaptionControl.SetValue("AutoSave", false);
         }
 
-        txtCategoryName.ResolverName = ResolverName;
+        txtCategoryCaption.ResolverName = ResolverName;
         chkCollapsible.ResolverName = ResolverName;
         chkCollapsedByDefault.ResolverName = ResolverName;
         chkVisible.ResolverName = ResolverName;
@@ -67,7 +67,7 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_Categor
     {
         base.OnPreRender(e);
 
-        lblCategoryName.AssociatedControlClientID = EditingFormControl.GetInputClientID(txtCategoryName.NestedControl.Controls);
+        lblCategoryCaption.AssociatedControlClientID = EditingFormControl.GetInputClientID(txtCategoryCaption.NestedControl.Controls);
         lblCollapsible.AssociatedControlClientID = EditingFormControl.GetInputClientID(chkCollapsible.NestedControl.Controls);
         lblCollapsedByDefault.AssociatedControlClientID = EditingFormControl.GetInputClientID(chkCollapsedByDefault.NestedControl.Controls);
         lblVisible.AssociatedControlClientID = EditingFormControl.GetInputClientID(chkVisible.NestedControl.Controls);
@@ -82,14 +82,14 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_Categor
         if (CategoryInfo != null)
         {
             bool isMacro;
-            txtCategoryName.SetValue(CategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.Caption, out isMacro), isMacro);
+            txtCategoryCaption.SetValue(CategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.Caption, out isMacro), isMacro);
             chkCollapsible.SetValue(CategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.Collapsible, out isMacro), isMacro);
             chkCollapsedByDefault.SetValue(CategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.CollapsedByDefault, out isMacro), isMacro);
             chkVisible.SetValue(CategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.Visible, out isMacro), isMacro);
         }
         else
         {
-            txtCategoryName.SetValue(null);
+            txtCategoryCaption.SetValue(null);
             chkCollapsible.SetValue("false");
             chkCollapsedByDefault.SetValue("false");
             chkVisible.SetValue("true");
@@ -106,12 +106,13 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_Categor
         if (CategoryInfo != null)
         {
             // Save LocalizableTextBox control
-            LocalizableFormEngineUserControl fieldCaptionControl = (LocalizableFormEngineUserControl)txtCategoryName.NestedControl;
+            LocalizableFormEngineUserControl fieldCaptionControl = (LocalizableFormEngineUserControl)txtCategoryCaption.NestedControl;
             if (fieldCaptionControl != null)
             {
                 fieldCaptionControl.Save();
             }
-            CategoryInfo.SetPropertyValue(FormCategoryPropertyEnum.Caption, ValidationHelper.GetString(txtCategoryName.Value, String.Empty).Replace("'", string.Empty), txtCategoryName.IsMacro);
+
+            CategoryInfo.SetPropertyValue(FormCategoryPropertyEnum.Caption, ValidationHelper.GetString(txtCategoryCaption.Value, String.Empty).Replace("'", string.Empty), txtCategoryCaption.IsMacro);
             CategoryInfo.SetPropertyValue(FormCategoryPropertyEnum.Collapsible, Convert.ToString(chkCollapsible.Value), chkCollapsible.IsMacro);
             CategoryInfo.SetPropertyValue(FormCategoryPropertyEnum.CollapsedByDefault, Convert.ToString(chkCollapsedByDefault.Value), chkCollapsedByDefault.IsMacro);
             CategoryInfo.SetPropertyValue(FormCategoryPropertyEnum.Visible, Convert.ToString(chkVisible.Value), chkVisible.IsMacro);

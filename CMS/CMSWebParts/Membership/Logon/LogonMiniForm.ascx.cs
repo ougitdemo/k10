@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
@@ -9,6 +10,7 @@ using CMS.Activities.Loggers;
 using CMS.DocumentEngine;
 using CMS.Base.Web.UI;
 using CMS.DataEngine;
+using CMS.EventLog;
 using CMS.Helpers;
 using CMS.Membership;
 using CMS.MembershipProvider;
@@ -606,7 +608,16 @@ function UpdateLabel_", ClientID, @"(content, context) {
         }
         else
         {
-            e.Authenticated = Membership.Provider.ValidateUser(loginElem.UserName, loginElem.Password);
+            try
+            {
+                e.Authenticated = Membership.Provider.ValidateUser(loginElem.UserName, loginElem.Password);
+            }
+            catch (ConfigurationException ex)
+            {
+                EventLogProvider.LogException("LogonMiniForm", "VALIDATEUSER", ex);
+                var provider = new CMSMembershipProvider();
+                e.Authenticated = provider.ValidateUser(loginElem.UserName, loginElem.Password);
+            }
         }
 
     }

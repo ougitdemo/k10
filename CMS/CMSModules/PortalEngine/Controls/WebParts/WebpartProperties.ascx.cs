@@ -3,7 +3,6 @@ using System.Collections;
 using System.Data;
 using System.Web.UI;
 
-using CMS.Base;
 using CMS.Base.Web.UI;
 using CMS.DocumentEngine;
 using CMS.EventLog;
@@ -44,7 +43,7 @@ public partial class CMSModules_PortalEngine_Controls_WebParts_WebpartProperties
     private WebPartInstance webPartInstance = null;
 
     /// <summary>
-    /// Main web part instance
+    /// Main web part instance.
     /// </summary>
     private WebPartInstance mainWebPartInstance = null;
 
@@ -64,7 +63,7 @@ public partial class CMSModules_PortalEngine_Controls_WebParts_WebpartProperties
     private WebPartInfo wpi = null;
 
     /// <summary>
-    /// Indicates whether the new variant should be chosen when closing this dialog
+    /// Indicates whether the new variant should be chosen when closing this dialog.
     /// </summary>
     private bool selectNewVariant = false;
 
@@ -328,7 +327,7 @@ public partial class CMSModules_PortalEngine_Controls_WebParts_WebpartProperties
             form.LoadData(dr);
         }
     }
-    
+
 
     /// <summary>
     /// Loads the web part form.
@@ -860,6 +859,7 @@ public partial class CMSModules_PortalEngine_Controls_WebParts_WebpartProperties
             }
 
             bool isWebPartVariant = (VariantID > 0) || (ZoneVariantID > 0) || IsNewVariant;
+
             if (!isWebPartVariant)
             {
                 // Save the changes  
@@ -901,7 +901,7 @@ public partial class CMSModules_PortalEngine_Controls_WebParts_WebpartProperties
         if (basicForm.Visible && (webPartInstance != null))
         {
             // Keep the old ID to check the change of the ID
-            string oldId = webPartInstance.ControlID.ToLowerInvariant();
+            string oldWebPartControlId = webPartInstance.ControlID.ToLowerInvariant();
 
             DataRow dr = basicForm.DataRow;
             foreach (DataColumn column in dr.Table.Columns)
@@ -912,43 +912,51 @@ public partial class CMSModules_PortalEngine_Controls_WebParts_WebpartProperties
                 webPartInstance.SetValue(column.ColumnName, dr[column]);
 
                 // If name changed, move the content
-                if (safeColumnName == "webpartcontrolid")
+                if (safeColumnName.Equals("webpartcontrolid", StringComparison.OrdinalIgnoreCase))
                 {
-                    try
-                    {
-                        string newId = null;
-                        if (!IsNewVariant)
-                        {
-                            newId = ValidationHelper.GetString(dr[column], "").ToLowerInvariant();
-                        }
+                    // Get the possibly updated web part control id
+                    string newWebPartControlId = webPartInstance.ControlID.ToLowerInvariant();
 
-                        // Name changed
-                        if ((!string.IsNullOrEmpty(newId)) && (newId != oldId))
-                        {
-                            if (!IsNewWebPart && !IsNewVariant)
-                            {
-                                WebPartIDChanged = true;
-                            }
-                            WebPartID = newId;
-
-                            // Move the document content if present
-                            ChangeEditableContentIDs(oldId, newId);
-
-                            // Change the underlying zone names if layout web part
-                            if ((wpi != null) && ((WebPartTypeEnum)wpi.WebPartType == WebPartTypeEnum.Layout))
-                            {
-                                ChangeLayoutZoneIDs(oldId, newId);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        EventLogProvider.LogException("Content", "CHANGEWEBPART", ex);
-                    }
+                    ChangeWebPartControlId(oldWebPartControlId, newWebPartControlId);
                 }
             }
 
             SaveCategoryCollapsingState(basicForm);
+        }
+    }
+
+
+    /// <summary>
+    /// Changes the web part control id in database tables which use this id as an identifier.
+    /// </summary>
+    private void ChangeWebPartControlId(string oldWebPartControlId, string newWebPartControlId)
+    {
+        if (IsNewVariant || IsNewWebPart)
+        {
+            return;
+        }
+
+        WebPartIDChanged = true;
+
+        try
+        {
+            if (!String.Equals(oldWebPartControlId, newWebPartControlId, StringComparison.InvariantCultureIgnoreCase))
+            {
+                WebPartID = newWebPartControlId;
+
+                // Move the document content if present
+                ChangeEditableContentIDs(oldWebPartControlId, newWebPartControlId);
+
+                // Change the underlying zone names if layout web part
+                if ((wpi != null) && ((WebPartTypeEnum)wpi.WebPartType == WebPartTypeEnum.Layout))
+                {
+                    ChangeLayoutZoneIDs(oldWebPartControlId, newWebPartControlId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            EventLogProvider.LogException("Content", "CHANGEWEBPART", ex);
         }
     }
 
@@ -1051,8 +1059,19 @@ public partial class CMSModules_PortalEngine_Controls_WebParts_WebpartProperties
         {
             if (zone.ZoneID.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase))
             {
+                string newZoneId = newId + "_" + zone.ZoneID.Substring(prefix.Length);
+                string oldZoneId = zone.ZoneID;
+
                 // Change the zone prefix to the new one
-                zone.ZoneID = newId + "_" + zone.ZoneID.Substring(prefix.Length);
+                zone.ZoneID = newZoneId;
+
+                WebPartEvents.ChangeLayoutZoneId.StartEvent(new ChangeLayoutZoneIdArgs
+                {
+                    OldZoneId = oldZoneId,
+                    NewZoneId = newZoneId,
+                    PageTemplateId = pti.PageTemplateId,
+                    ZoneWebParts = zone.WebParts
+                });
             }
         }
     }

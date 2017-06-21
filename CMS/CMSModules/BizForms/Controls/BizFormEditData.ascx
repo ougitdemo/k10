@@ -5,7 +5,7 @@
 <cms:unigrid runat="server" id="gridData" islivesite="false" >
     <GridActions>
        <ug:action name="edit" externalsourcename="edit" caption="$General.Edit$" FontIconClass="icon-edit" FontIconStyle="Allow" />
-       <ug:action name="delete" externalsourcename="delete" caption="$General.Delete$" FontIconClass="icon-bin" FontIconStyle="Critical" confirmation="$general.confirmdelete$"/>
+       <ug:action name="delete" caption="$General.Delete$" FontIconClass="icon-bin" FontIconStyle="Critical" confirmation="$general.confirmdelete$"/>
     </GridActions>
     <GridColumns>
     </GridColumns>

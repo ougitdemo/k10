@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Data;
 using System.Web;
 using System.Text;
@@ -10,6 +11,7 @@ using System.Web.UI.HtmlControls;
 using CMS.Base;
 using CMS.Base.Web.UI;
 using CMS.DataEngine;
+using CMS.EventLog;
 using CMS.Helpers;
 using CMS.Localization;
 using CMS.Membership;
@@ -498,7 +500,16 @@ function UpdateLabel_", ClientID, @"(content, context) {
         }
         else
         {
-            e.Authenticated = Membership.Provider.ValidateUser(Login1.UserName, Login1.Password);
+            try
+            {
+                e.Authenticated = Membership.Provider.ValidateUser(Login1.UserName, Login1.Password);
+            }
+            catch (ConfigurationException ex)
+            {
+                EventLogProvider.LogException("LogonPage", "VALIDATEUSER", ex);
+                var provider = new CMSMembershipProvider();
+                e.Authenticated = provider.ValidateUser(Login1.UserName, Login1.Password);
+            }
         }
     }
 

@@ -785,7 +785,7 @@ function Edit_{0}(attachmentGUID, formGUID, versionHistoryID, parentId, hash, im
         }
 
         LastAction = "delete";
-        Value = Guid.Empty;
+        Value = null;
     }
 
 

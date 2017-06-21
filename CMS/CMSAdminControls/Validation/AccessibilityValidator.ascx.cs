@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
+using System.Net.Security;
 
 using CMS.Base;
 
@@ -14,6 +15,7 @@ using CMS.Base.Web.UI;
 using CMS.Base.Web.UI.ActionsConfig;
 using CMS.DocumentEngine;
 using CMS.FormEngine.Web.UI;
+using CMS.EventLog;
 using CMS.Helpers;
 using CMS.IO;
 using CMS.UIControls;
@@ -227,7 +229,7 @@ public partial class CMSAdminControls_Validation_AccessibilityValidator : Docume
 
     #region "Constants"
 
-    private const string DEFAULT_VALIDATOR_URL = "http://achecker.ca/checker/index.php";
+    private const string DEFAULT_VALIDATOR_URL = "https://achecker.ca/checker/index.php";
 
     #endregion
 
@@ -297,7 +299,7 @@ public partial class CMSAdminControls_Validation_AccessibilityValidator : Docume
             return "validation|access|" + CultureCode + "|" + Url;
         }
     }
-    
+
 
     /// <summary>
     /// Gets or sets validation standard
@@ -578,10 +580,19 @@ public partial class CMSAdminControls_Validation_AccessibilityValidator : Docume
             Random randGen = new Random();
 
             // Create web request
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(ValidatorURL);
-            req.Method = "POST";
+            HttpWebRequest req = WebRequest.CreateHttp(ValidatorURL);
+            req.Method = WebRequestMethods.Http.Post;
             string boundary = "---------------------------" + randGen.Next(1000000, 9999999) + randGen.Next(1000000, 9999999);
             req.ContentType = "multipart/form-data; boundary=" + boundary;
+
+            if (req.RequestUri.Scheme == Uri.UriSchemeHttps)
+            {
+                req.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) =>
+                {
+                    // Accept certificate if the certificate is valid and signed
+                    return (sslPolicyErrors == SslPolicyErrors.None);
+                };
+            }
 
             // Set data to web request for validation           
             byte[] data = Encoding.GetEncoding("UTF-8").GetBytes(GetRequestData(GetRequestDictionary(htmlData), boundary));
@@ -608,8 +619,15 @@ public partial class CMSAdminControls_Validation_AccessibilityValidator : Docume
 
             return dsValResult;
         }
-        catch
+        catch (Exception ex)
         {
+            if ((ex is WebException) && (((WebException)ex).Status == WebExceptionStatus.TrustFailure))
+            {
+                EventLogProvider.LogException("AccessibilityValidator", "GetValidationResult", ex);
+                mErrorText = GetString("validation.servercertificateerror");
+                return null;
+            }
+
             mErrorText = GetString("validation.servererror");
             return null;
         }

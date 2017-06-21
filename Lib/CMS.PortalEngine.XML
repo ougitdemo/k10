@@ -1203,6 +1203,11 @@
             Move web part handler
             </summary>
         </member>
+        <member name="T:CMS.PortalEngine.ChangeLayoutZoneIdHandler">
+            <summary>
+            Handler which is used when the layout zone id is changed.
+            </summary>
+        </member>
         <member name="T:CMS.PortalEngine.RemoveWebPartHandler">
             <summary>
             Remove web part handler
@@ -1210,7 +1215,7 @@
         </member>
         <member name="T:CMS.PortalEngine.WebPartLoadVariantsArgs">
             <summary>
-            Argument class for events raised for load variants
+            Argument class for events raised for load variants.
             </summary>
         </member>
         <member name="P:CMS.PortalEngine.WebPartLoadVariantsArgs.ForceLoad">
@@ -1235,7 +1240,7 @@
         </member>
         <member name="T:CMS.PortalEngine.MoveWebPartsArgs">
             <summary>
-            Argument class for events raised after webpart movement
+            Argument class for events raised after web part movement.
             </summary>
         </member>
         <member name="P:CMS.PortalEngine.MoveWebPartsArgs.Zone">
@@ -1273,6 +1278,31 @@
             Source zone instance
             </summary>
         </member>
+        <member name="T:CMS.PortalEngine.ChangeLayoutZoneIdArgs">
+            <summary>
+            Argument class for events raised for layout zone id change.
+            </summary>
+        </member>
+        <member name="P:CMS.PortalEngine.ChangeLayoutZoneIdArgs.OldZoneId">
+            <summary>
+            Gets or sets the old layout zone id.
+            </summary>
+        </member>
+        <member name="P:CMS.PortalEngine.ChangeLayoutZoneIdArgs.NewZoneId">
+            <summary>
+            Gets or sets the new layout zone id.
+            </summary>
+        </member>
+        <member name="P:CMS.PortalEngine.ChangeLayoutZoneIdArgs.PageTemplateId">
+            <summary>
+            Gets or sets the page template id where the layout zone is located.
+            </summary>
+        </member>
+        <member name="P:CMS.PortalEngine.ChangeLayoutZoneIdArgs.ZoneWebParts">
+            <summary>
+            Gets or sets the layout zone web parts.
+            </summary>
+        </member>
         <member name="T:CMS.PortalEngine.WebPartEvents">
             <summary>
             Web part (web part zone) events
@@ -1280,22 +1310,22 @@
         </member>
         <member name="F:CMS.PortalEngine.WebPartEvents.WebPartZoneLoadVariant">
             <summary>
-            Fires when webparts load variants
+            Fires when web parts load variants
             </summary>
         </member>
         <member name="F:CMS.PortalEngine.WebPartEvents.WebPartLoadVariant">
             <summary>
-            Fires when webparts load variants
+            Fires when web parts load variants
             </summary>
         </member>
         <member name="F:CMS.PortalEngine.WebPartEvents.MoveWebPart">
             <summary>
-            Fires when single webpart is moved
+            Fires when single web part is moved
             </summary>
         </member>
         <member name="F:CMS.PortalEngine.WebPartEvents.MoveAllWebParts">
             <summary>
-            Fires when all webparts are moved
+            Fires when all web parts are moved
             </summary>
         </member>
         <member name="F:CMS.PortalEngine.WebPartEvents.RemoveWebPart">
@@ -1306,6 +1336,11 @@
         <member name="F:CMS.PortalEngine.WebPartEvents.RemoveAllWebParts">
             <summary>
             Fires when all web part are removed
+            </summary>
+        </member>
+        <member name="F:CMS.PortalEngine.WebPartEvents.ChangeLayoutZoneId">
+            <summary>
+            Fires when a layout zone id is changed
             </summary>
         </member>
         <member name="T:CMS.PortalEngine.WebPartLoadVariantHandler">
@@ -1741,6 +1776,13 @@
             </summary>
             <param name="cloneZones">If true, the zone instances are cloned</param>
             <param name="copyMacroTable">Indicates whether macro values should be cloned</param>
+        </member>
+        <member name="M:CMS.PortalEngine.PageTemplateInstance.UpdateParentTemplateInstance(CMS.PortalEngine.WebPartZoneInstance,CMS.PortalEngine.PageTemplateInstance)">
+            <summary>
+            Sets <see cref="P:CMS.PortalEngine.WebPartZoneInstance.ParentTemplateInstance"/> property of given <paramref name="zoneInstance"/> and all its zone variants to specified <paramref name="templateInstance"/>.
+            </summary>
+            <param name="zoneInstance">Web part zone instance to be updated</param>
+            <param name="templateInstance">Target page template instance</param>
         </member>
         <member name="M:CMS.PortalEngine.PageTemplateInstance.GetZone(System.String,System.Int32)">
             <summary>

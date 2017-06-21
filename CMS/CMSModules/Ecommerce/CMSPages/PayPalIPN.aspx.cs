@@ -16,6 +16,16 @@ public partial class CMSModules_Ecommerce_CMSPages_PayPalIPN : CMSPage
     private string orderCulture = null;
 
 
+    /// <summary>
+    /// Page constructor used for disabling CSRF protection.
+    /// </summary>
+    public CMSModules_Ecommerce_CMSPages_PayPalIPN()
+    {
+        // Disable the CSRF protection on the page (data received from PayPal doesn't contain CSRF hidden field)
+        Page.Items["CsrfProtectionDisabledOnPage"] = true;
+    }
+
+
     protected void Page_Load(object sender, EventArgs e)
     {
         // Get order id

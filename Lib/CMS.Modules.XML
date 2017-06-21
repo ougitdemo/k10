@@ -773,6 +773,12 @@
             </summary>
             <returns>Settings categories of module</returns>
         </member>
+        <member name="M:CMS.Modules.ModuleDataProvider.GetModuleSystemTables">
+            <summary>
+            Gets object query for system tables (contained in module) to be included in the export package.
+            </summary>
+            <returns>System tables of module</returns>
+        </member>
         <member name="M:CMS.Modules.ModuleDataProvider.#ctor(CMS.Modules.ResourceInfo)">
             <summary>
             Creates a new module database objects provider.

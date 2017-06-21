@@ -841,7 +841,7 @@ public partial class CMSModules_MediaLibrary_Controls_MediaLibrary_MediaLibrary 
             fileSystemDataSource.WhereCondition = where;
         }
 
-        string orderBy = GetOrderBy();
+        string orderBy = GetFileSystemOrderBy();
         if (!string.IsNullOrEmpty(orderBy))
         {
             fileSystemDataSource.OrderBy = orderBy;
@@ -855,6 +855,18 @@ public partial class CMSModules_MediaLibrary_Controls_MediaLibrary_MediaLibrary 
         fileSystemDataSource.Path = path;
 
         return (DataSet)fileSystemDataSource.LoadData(true);
+    }
+
+
+    private string GetFileSystemOrderBy()
+    {
+        var generalSizeColumn = "[FileSize]";
+        var fileSystemSizeColumn = "[Size]";
+        var orderBy = GetOrderBy();
+        var isSizeOrderBy = orderBy.IndexOf(generalSizeColumn, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        // File system data source has different field name for file size
+        return isSizeOrderBy ? orderBy.Replace(generalSizeColumn, fileSystemSizeColumn) : orderBy;
     }
 
 

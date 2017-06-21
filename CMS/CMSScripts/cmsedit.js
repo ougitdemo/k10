@@ -1,5 +1,7 @@
 ﻿window.cmsResizeIntervalIsSet = false;
-var cmsDragEditableItem = {};
+
+// List of text areas and input elements which are being dragged.
+var cmsDraggedEditableElements = {};
 
 function InitializePage() {
     if (IsIExplorer(8)) {
@@ -425,66 +427,78 @@ function ChangeDevice(device) {
     }
 }
 
-// Rename the text area element (ID and NAME parameter) when moving widgets between zones
-function CKRenameWidgetTextareas(zoneName, targetZoneName) {
-    if ((cmsDragEditableItem !== null)
-        && (typeof (CKEDITOR) !== "undefined")
-        && (CKEDITOR !== null)
-        && (CKEDITOR.instances !== null)) {
-        var items = cmsDragEditableItem;
+// Update the text areas and input element ID and NAME parameters when moving widgets between zones
+function UpdateWidgetInputElementIdentifiers(sourceZoneName, targetZoneName) {
 
-        for (var key in cmsDragEditableItem) {
-            var instanceId = key;
-            var config = cmsDragEditableItem[key];
-            var el = document.getElementById(instanceId);
+    if (cmsDraggedEditableElements !== null) {
+        for (var inputElementId in cmsDraggedEditableElements) {
 
-            if (el !== null) {
+            var inputElement = document.getElementById(inputElementId);
+            if (inputElement !== null) {
                 // Generate correct element IDs to ensure correct postback behavior
-                var zoneId = zoneName.replace(/\$/g, "_");;
-                var targetZoneId = targetZoneName.replace(/\$/g, "_");;
-                instanceId = el.id.replace(zoneId, targetZoneId);
+                var sourceZoneId = sourceZoneName.replace(/\$/g, "_");;
+                var targetZoneId = targetZoneName.replace(/\$/g, "_");
+                var newInstanceId = inputElement.id.replace(sourceZoneId, targetZoneId);
 
                 // Update htmlEditor identifiers to reflect the new target zone
-                el.id = instanceId;
-                el.name = el.name.replace(zoneName, targetZoneName);
+                inputElement.id = newInstanceId;
+                inputElement.name = inputElement.name.replace(sourceZoneName, targetZoneName);
 
                 // Restore editable content
-                var jObj = $cmsj(el);
-                jObj.val(jObj.data('value'));
-                jObj.html(jObj.val());
-                el.defaultValue = jObj.html();
+                var $inputElement = $cmsj(inputElement);
+                var text = $inputElement.data('text');
+                $inputElement.val(text);
 
-                // Reload the CKEditor
-                if (typeof (CKReplace) === 'function') {
-                    CKReplace(instanceId, config);
+                if ($inputElement.data('isCKEditor')) {
+                    // Re-create the CKEditor
+                    var config = cmsDraggedEditableElements[inputElementId];
+                    if (typeof (CKReplace) === 'function') {
+                        CKReplace(newInstanceId, config);
+                    }
                 }
             }
         }
     }
-    cmsDragEditableItem = {};
+
+    // Clear the list of text areas and input elements which are being dragged.
+    cmsDraggedEditableElements = {};
 }
 
 function BeforeDropWebPart(container, item, position) {
-    // Build a list of text areas (and store their value) which are being dragged because text areas loose their value when removed and inserted into DOM.
-    cmsDragEditableItem = {};
-    if ((typeof (CKEDITOR) !== "undefined")
-        && (CKEDITOR !== null)
-        && (CKEDITOR.instances !== null)) {
 
-        $cmsj('textarea', item).each(function () {
-            var jObj = $cmsj(this);
-            var instanceId = jObj.attr('id');
-            var inst = CKEDITOR.instances[instanceId];
-
-            if (typeof inst !== 'undefined') {
-                // Store editable content
-                jObj.val(inst.getData());
-                jObj.data('value', jObj.val());
-                cmsDragEditableItem[instanceId] = inst.config;
-
-                // Destroy editor instance
-                inst.destroy();
-            }
-        });
+    var getCKEditorInstance = function (instanceId) {
+        return ((typeof CKEDITOR !== "undefined")
+            && (CKEDITOR !== null)
+            && (CKEDITOR.instances !== null)) ? CKEDITOR.instances[instanceId] : undefined;
     }
+
+    // Build a list of text areas and input elements which are being dragged.
+    cmsDraggedEditableElements = {};
+
+    // Find all the DOM elements which can contain editable widgets or editable server controls
+    var editableItems = $cmsj('.CMSEditableRegionEdit, .EditableTextEdit, .EditableImageEdit', item);
+
+    $cmsj('textarea, input', editableItems).each(function () {
+        var $inputElement = $cmsj(this);
+        var inputElementId = $inputElement.attr('id');
+
+        var ckEditorInstance = getCKEditorInstance(inputElementId);
+        if (ckEditorInstance !== undefined) {
+            // CKEditor
+            $inputElement.data('isCKEditor', 'true');
+
+            // Store CKEditor configuration
+            // This configuration will be used for CKEditor re-creation after the widget is dropped
+            cmsDraggedEditableElements[inputElementId] = ckEditorInstance.config;
+
+            // Destroy CKEditor instance
+            ckEditorInstance.destroy();
+        }
+        else {
+            cmsDraggedEditableElements[inputElementId] = inputElementId;
+        }
+
+        // Store input text in jQuery data object because text areas loose their value when moved within DOM
+        $inputElement.data('text', $inputElement.val());
+    });
 }

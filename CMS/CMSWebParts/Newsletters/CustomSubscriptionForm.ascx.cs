@@ -372,8 +372,8 @@ public partial class CMSWebParts_Newsletters_CustomSubscriptionForm : CMSAbstrac
                     formElem.ValidationErrorMessage = SubscriptionErrorMessage;
                     formElem.IsLiveSite = true;
 
-                    // Reload form if not in PortalEngine environment and if post back
-                    if (StandAlone && RequestHelper.IsPostBack())
+                    // Reload form if not in PortalEngine environment
+                    if (StandAlone)
                     {
                         formElem.ReloadData();
                     }
@@ -473,7 +473,7 @@ public partial class CMSWebParts_Newsletters_CustomSubscriptionForm : CMSAbstrac
     /// </summary>
     protected void btnSubmit_Click(object sender, EventArgs e)
     {
-        if (PortalContext.IsDesignMode(PortalManager.ViewMode) || (HideOnCurrentPage) || (!IsVisible))
+        if (PortalContext.IsDesignMode(PageManager.ViewMode) || (HideOnCurrentPage) || (!IsVisible))
         {
             // Do not process
             return;

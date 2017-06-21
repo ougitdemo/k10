@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using CMS.Helpers;
-
 using System.Linq;
 using System.Text;
 using System.Web.UI.WebControls;
 
-using AjaxControlToolkit;
-
 using CMS.Base.Web.UI;
 using CMS.FormEngine.Web.UI;
+using CMS.Helpers;
 using CMS.PortalEngine.Web.UI;
+
+using AjaxControlToolkit;
 
 
 public partial class CMSFormControls_Basic_NumericUpDown : FormEngineUserControl
@@ -444,6 +442,7 @@ public partial class CMSFormControls_Basic_NumericUpDown : FormEngineUserControl
         if (Enabled)
         {
             FixMinimumScript();
+            FixValueSettingScript();
             EnableCheckingChanges();
         }
         else
@@ -508,6 +507,41 @@ Sys.Application.add_load(function (){
 
         // Fix should be applied only once no matter how many numeric up/down controls are on the page.
         ScriptHelper.RegisterStartupScript(this, typeof(string), "NumericUpDownMinimumFix", ScriptHelper.GetScript(scriptFix));
+    }
+
+
+    /// <summary>
+    /// Fixes original value setting javascript code.
+    /// </summary>
+    /// <remarks>
+    /// Original implementation misses check for current value when setting the new one.
+    /// This could cause infinite refresh loop.
+    /// </remarks>
+    private void FixValueSettingScript()
+    {
+        // copied from original source code: https://searchcode.com/codesearch/raw/5095105/
+        const string SCRIPT_FIX =
+            @"Sys.Extended.UI.NumericUpDownBehavior.prototype.setCurrentToTextBox = function(value) {
+                    if (this._elementTextBox.value == value) {
+                        return;
+                    }
+
+                    if (this._elementTextBox) {
+                        this._elementTextBox.value = value;
+                        this.raiseCurrentChanged(value);
+
+                        if (document.createEvent) {
+                            var onchangeEvent = document.createEvent('HTMLEvents');
+                            onchangeEvent.initEvent('change', true, false);
+                            this._elementTextBox.dispatchEvent(onchangeEvent);
+                        }
+                        else if (document.createEventObject) {
+                            this._elementTextBox.fireEvent('onchange');
+                        }
+                    }
+                };";
+
+        ScriptHelper.RegisterStartupScript(this, typeof(string), "NumericUpDownValueSetFix", ScriptHelper.GetScript(SCRIPT_FIX));
     }
 
 

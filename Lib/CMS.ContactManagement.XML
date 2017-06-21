@@ -1013,6 +1013,33 @@
             <param name="stringGuids"><see cref="T:System.Guid"/>s separated with semicolon.</param>
             <param name="guids"><see cref="T:System.Guid"/>s parsed from <paramref name="stringGuids"/>.</param>
         </member>
+        <member name="T:CMS.ContactManagement.Internal.IContactProcessingChecker">
+            <summary>
+            Provides method for checking whether the contact processing can continue.
+            </summary>
+        </member>
+        <member name="M:CMS.ContactManagement.Internal.IContactProcessingChecker.CanProcessContactInCurrentContext">
+            <summary>
+            Checks whether the contact processing can continue in the context of current HTTP request.
+            </summary>
+            <returns><c>True</c> if the contact processing can continue; otherwise, <c>false</c></returns>
+        </member>
+        <member name="M:CMS.ContactManagement.Internal.ContactProcessingChecker.CanProcessContactInCurrentContext">
+            <summary>
+            Checks whether the contact processing can continue in the context of current HTTP request.
+            </summary>
+            <returns><c>True</c> if the contact processing can continue; otherwise, <c>false</c></returns>
+        </member>
+        <member name="T:CMS.ContactManagement.Internal.ICookieContextProvider">
+            <summary>
+            Provides methods for obtaining contextual cookie information for the current request.
+            </summary>
+        </member>
+        <member name="M:CMS.ContactManagement.Internal.ICookieContextProvider.GetCurrentCookieLevel">
+            <summary>
+            Gets the current request cookie level which can be set by using cookie law consent web part.
+            </summary>
+        </member>
         <member name="T:CMS.ContactManagement.Internal.ContactMergeHandler">
             <summary>
             Event handler for the event fired once merging of <see cref="T:CMS.ContactManagement.ContactInfo"/> is in the progress.
@@ -1053,7 +1080,8 @@
         </member>
         <member name="M:CMS.ContactManagement.IContactMergeService.MergeContactByEmail(CMS.ContactManagement.ContactInfo)">
             <summary>
-            Tries to merge given <paramref name="contact"/> by <see cref="P:CMS.ContactManagement.ContactInfo.ContactEmail"/>. Moves activities, memberships, relations and copies contact's data. 
+            Tries to merge given <paramref name="contact"/> by <see cref="P:CMS.ContactManagement.ContactInfo.ContactEmail"/>. Moves subscriptions and copies contact's data. 
+            In the case the EMS license is available, moves activities, memberships, relations and copies contact's data. 
             Given <paramref name="contact"/> will be used as merge target, i.e. this particular <see cref="T:CMS.ContactManagement.ContactInfo"/> will remain, while others with the same <see cref="P:CMS.ContactManagement.ContactInfo.ContactEmail"/>
             will be merged to the <paramref name="contact"/>.
             </summary>
@@ -1065,8 +1093,8 @@
         </member>
         <member name="M:CMS.ContactManagement.IContactMergeService.MergeContacts(CMS.ContactManagement.ContactInfo,CMS.ContactManagement.ContactInfo)">
             <summary>
-            Merges given <paramref name="source"/> contact to the <paramref name="target"/>. Moves activities, memberships, copies data and set the 
-            <paramref name="target"/> as currect contact to the response cookie.
+            Merges given <paramref name="source"/> contact to the <paramref name="target"/>. Moves subscriptions and copies contact's data. 
+            In the case the EMS license is available, moves activities, memberships and relations.
             </summary>
             <remarks>
             Does not set the result of merge to the current context or store the GUID in response cookie. If the result should be somehow
@@ -1077,7 +1105,8 @@
         </member>
         <member name="M:CMS.ContactManagement.ContactMergeService.MergeContacts(CMS.ContactManagement.ContactInfo,CMS.ContactManagement.ContactInfo)">
             <summary>
-            Merges given <paramref name="source"/> contact to the <paramref name="target"/>. Moves activities, memberships, relations and copies contact's data.
+            Merges given <paramref name="source"/> contact to the <paramref name="target"/>. Moves subscriptions and copies contact's data. 
+            In the case the EMS license is available, moves activities, memberships and relations.
             </summary>
             <remarks>
             Does not set the result of merge to the current context or store the GUID in response cookie. If the result should be somehow
@@ -1089,7 +1118,8 @@
         </member>
         <member name="M:CMS.ContactManagement.ContactMergeService.MergeContactByEmail(CMS.ContactManagement.ContactInfo)">
             <summary>
-            Tries to merge given <paramref name="contact"/> by <see cref="P:CMS.ContactManagement.ContactInfo.ContactEmail"/>. Moves activities, memberships, relations and copies contact's data. 
+            Tries to merge given <paramref name="contact"/> by <see cref="P:CMS.ContactManagement.ContactInfo.ContactEmail"/>. Moves subscriptions and copies contact's data. 
+            In the case the EMS license is available, moves activities, memberships, relations and copies contact's data. 
             Given <paramref name="contact"/> will be used as merge target, i.e. this particular <see cref="T:CMS.ContactManagement.ContactInfo"/> will remain, while others with the same <see cref="P:CMS.ContactManagement.ContactInfo.ContactEmail"/>
             will be merged to the <paramref name="contact"/>.
             </summary>
@@ -1127,13 +1157,6 @@
             </summary>
             <param name="email">Contacts new email</param>
             <param name="currentUser">Current user</param>
-        </member>
-        <member name="M:CMS.ContactManagement.CurrentContactMergeService.#ctor(CMS.ContactManagement.IContactMergeService,CMS.ContactManagement.ICurrentContactProvider)">
-            <summary>
-            Instantiates new instance of <see cref="T:CMS.ContactManagement.CurrentContactMergeService"/>.
-            </summary>
-            <param name="contactMergeService">Provides method for merging of a <see cref="T:CMS.ContactManagement.ContactInfo"/> into another one</param>
-            <param name="currentContactProvider">Service for recognizing and storing information about a contact currently browsing the live site.</param>
         </member>
         <member name="M:CMS.ContactManagement.CurrentContactMergeService.MergeCurrentContactWithContact(CMS.ContactManagement.ContactInfo)">
             <summary>
@@ -3474,6 +3497,16 @@
             Sets campaign, geolocation and creation time to a new contact
             </summary>
         </member>
+        <member name="M:CMS.ContactManagement.ContactInfoProvider.GetTruncatedName(System.String)">
+            <summary>
+            Returns name trimmed to 100 chars. If the string is shorter, returns the same string.
+            </summary>
+        </member>
+        <member name="M:CMS.ContactManagement.ContactInfoProvider.ContactFieldCanBeModified(System.Boolean,CMS.ContactManagement.ContactInfo,CMS.FormEngine.FormFieldInfo)">
+            <summary>
+            Returns true if contact's field can be modified.
+            </summary>
+        </member>
         <member name="T:CMS.ContactManagement.ContactListInfo">
             <summary>
             "Virtual" object for loading data from contact view.
@@ -4747,12 +4780,6 @@
             Stores contact in request items, session or cookies.
             </summary>
             <param name="contact">Contact to be set</param>
-        </member>
-        <member name="M:CMS.ContactManagement.ContactManagementContext.CheckEnabled">
-            <summary>
-            Checks if Online marketing is enabled, including license check and crawler check.
-            </summary>
-            <returns>True if online marketing is enabled, license is available and check pro crawlers passed.</returns>
         </member>
         <member name="P:CMS.ContactManagement.ContactManagementContext.CurrentContact">
             <summary>
@@ -7859,7 +7886,7 @@
         </member>
         <member name="T:CMS.ContactManagement.DefaultCookieService">
             <summary>
-            Provides methods for getting and setting the cookie from/to the request/response.
+            Provides methods for getting and setting the cookie from/to the request/response or the cookie contextual information.
             </summary>
             <remarks>
             Only wraps <see cref="T:CMS.Helpers.CookieHelper"/> for providing the ability to mock the service.
@@ -7946,6 +7973,11 @@
             <param name="cookieName">Name of the cookie to be set</param>
             <param name="value">Value of the cookie to be set</param>
             <param name="duration">Duration specifying how long will be the cookie valid till it expires</param>
+        </member>
+        <member name="M:CMS.ContactManagement.DefaultCookieService.GetCurrentCookieLevel">
+            <summary>
+            Gets the current request cookie level which can be set by using cookie law consent web part.
+            </summary>
         </member>
         <member name="T:CMS.ContactManagement.DefaultCurrentContactProvider">
             <summary>

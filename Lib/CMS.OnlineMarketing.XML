@@ -789,16 +789,16 @@
             Performs logging of the hit.
             </summary>
         </member>
-        <member name="T:CMS.OnlineMarketing.CrawlerCheckerActivityLogFilter">
+        <member name="T:CMS.OnlineMarketing.ContactProcessingCheckerActivityLogFilter">
             <summary>
-            Filters out logging for crawlers.
+            Filters out logging when processing of contacts (and therefore the activities) cannot continue.
             </summary>
         </member>
-        <member name="M:CMS.OnlineMarketing.CrawlerCheckerActivityLogFilter.IsDenied">
+        <member name="M:CMS.OnlineMarketing.ContactProcessingCheckerActivityLogFilter.IsDenied">
             <summary>
             Filters out logging for crawlers.
             </summary>
-            <returns>Returns <c>true</c> if logging should be filtered out, because current request was made by crawler. Otherwise returns <c>false</c>.</returns>
+            <returns>Returns <c>true</c> if logging should be filtered out, because processing of contacts cannot continue. Otherwise returns <c>false</c>.</returns>
         </member>
         <member name="T:CMS.OnlineMarketing.CurrentUserEnabledTrackingFilter">
             <summary>
@@ -2249,6 +2249,11 @@
         <member name="M:CMS.OnlineMarketing.MVTHandlers.DeleteWidgetVariants(System.Object,CMS.PortalEngine.DeleteVariantEventArgs)">
             <summary>
             Event raised when variants are to be deleted.
+            </summary>
+        </member>
+        <member name="M:CMS.OnlineMarketing.MVTHandlers.ChangeLayoutZoneId(System.Object,CMS.PortalEngine.ChangeLayoutZoneIdArgs)">
+            <summary>
+            Updates web parts variants after their parent layout zone id is changed
             </summary>
         </member>
         <member name="T:CMS.OnlineMarketing.MVTHelper">
@@ -4063,6 +4068,11 @@
             Returns contact ID for specified user
             </summary>
             <param name="parameters">Parameters array</param>
+        </member>
+        <member name="M:CMS.OnlineMarketing.OnlineMarketingModule.GetTruncatedName(System.String)">
+            <summary>
+            Returns name trimmed to 100 chars. If the string is shorter, returns the same string.
+            </summary>
         </member>
     </members>
 </doc>

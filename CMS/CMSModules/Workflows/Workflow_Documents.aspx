@@ -15,7 +15,7 @@
     </asp:Panel>
     <asp:Panel ID="pnlContent" runat="server">
         <asp:PlaceHolder ID="plcFilter" runat="server">
-            <cms:DocumentFilter ID="filterDocuments" runat="server" LoadSites="true" AllowSiteAutopostback="false" />
+            <cms:DocumentFilter ID="filterDocuments" runat="server" LoadSites="true" AllowSiteAutopostback="false" IncludeSiteCondition="True" />
         </asp:PlaceHolder>
         <cms:CMSUpdatePanel ID="pnlUpdate" runat="server" UpdateMode="Always">
             <ContentTemplate>

@@ -252,7 +252,13 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
     /// </summary>
     private string GetCurrentValues()
     {
-        var bindingTargetIdColumn = ObjectTypeManager.GetTypeInfo(TargetObjectType).IDColumn;
+        var bindingColumns = GetBindingColumns();
+        if (bindingColumns == null)
+        {
+            return String.Empty;
+        }
+
+        var bindingTargetIdColumn = bindingColumns.Item2;
 
         // Get all items based on where condition
         var targetIds = ModuleManager.GetReadOnlyObject(BindingObjectType)
@@ -299,12 +305,12 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
 
 
     /// <summary>
-    /// Returns binding column name for binding object type.
+    /// Returns binding column names for binding object type.
     /// 1. Try to search ParentObjectType (there should be first binding column name). 
     /// 2. Search for site ID column. In site bindings you will find column name for site.
     /// 3. If one of the columns is still not found, search all object's dependencies.
     /// </summary>
-    private string GetObjectDependencyColumn(string dependencyObjectType)
+    private IEnumerable<string> GetObjectDependencyColumn(string dependencyObjectType)
     {
         var bindingTypeInfo = ObjectTypeManager.GetTypeInfo(BindingObjectType);
         var dependencyTypeInfo = ObjectTypeManager.GetTypeInfo(dependencyObjectType);
@@ -312,26 +318,25 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
         // 1. ParentObjectType
         if (ParentObjectTypeEqualsDependencyObjectType(bindingTypeInfo, dependencyTypeInfo))
         {
-            return bindingTypeInfo.ParentIDColumn;
+            yield return bindingTypeInfo.ParentIDColumn;
         }
 
         // 2. Site bindings
         if ((bindingTypeInfo.SiteIDColumn != ObjectTypeInfo.COLUMN_NAME_UNKNOWN) &&
             dependencyObjectType.EqualsCSafe(PredefinedObjectType.SITE, true))
         {
-            return bindingTypeInfo.SiteIDColumn;
+            yield return bindingTypeInfo.SiteIDColumn;
         }
 
         // 3. Object's dependencies
         if (bindingTypeInfo.DependsOn != null)
         {
-            return bindingTypeInfo.DependsOn
-                                  .Where(d => d.DependencyObjectType.EqualsCSafe(dependencyObjectType, true))
-                                  .Select(d => d.DependencyColumn)
-                                  .FirstOrDefault();
+            foreach (var dependency in bindingTypeInfo.DependsOn
+                                                      .Where(d => d.DependencyObjectType.EqualsCSafe(dependencyObjectType, true)))
+            {
+                yield return dependency.DependencyColumn;
+            }
         }
-
-        return null;
     }
 
 
@@ -357,14 +362,11 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
 
         bool saved = false;
 
-        // Find column names for both binding
-        string objCol = GetObjectDependencyColumn(ObjectType);
-        string targetCol = GetObjectDependencyColumn(TargetObjectType);
-
-        if (!String.IsNullOrEmpty(targetCol) && !String.IsNullOrEmpty(objCol))
+        var bindingColumns = GetBindingColumns();
+        if (bindingColumns != null)
         {
             string deletedItems = DataHelper.GetNewItemsInList(newValues, CurrentValues);
-            var bindingsToDelete = GetBindings(deletedItems, objCol, targetCol, false);
+            var bindingsToDelete = GetBindings(deletedItems, bindingColumns, false);
             foreach (var bi in bindingsToDelete)
             {
                 bi.Delete();
@@ -373,7 +375,7 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
             }
 
             string addedItems = DataHelper.GetNewItemsInList(CurrentValues, newValues);
-            var bindingsToAdd = GetBindings(addedItems, objCol, targetCol, true);
+            var bindingsToAdd = GetBindings(addedItems, bindingColumns, true);
             foreach (var bi in bindingsToAdd)
             {
                 bi.Insert();
@@ -393,13 +395,43 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
 
 
     /// <summary>
+    /// Returns a pair of binding columns.
+    /// The first one is the 'parent object' ID column, for whom the bindings are displayed.
+    /// The second one is the 'other object' ID column, these objects are listed for selected 'parent'.
+    /// </summary>
+    /// <returns></returns>
+    private Tuple<string, string> GetBindingColumns()
+    {
+        // Find both column names for the binding
+        string objCol = GetObjectDependencyColumn(ObjectType)
+            .FirstOrDefault();
+
+        if (String.IsNullOrEmpty(objCol))
+        {
+            return null;
+        }
+
+        // Second time skip the already used column, in case both bound types are the same
+        string targetCol = GetObjectDependencyColumn(TargetObjectType)
+            .Except(new[] { objCol })
+            .FirstOrDefault();
+
+        if (String.IsNullOrEmpty(targetCol))
+        {
+            return null;
+        }
+
+        return Tuple.Create(objCol, targetCol);
+    }
+
+
+    /// <summary>
     /// Returns binding info objects for each changed item.
     /// </summary>
     /// <param name="changedItems">Comma separated list of changed IDs</param>
-    /// <param name="parentColumn">Parent ID column in the binding object</param>
-    /// <param name="targetColumn">Other related object ID column in the binding object</param>
+    /// <param name="bindingColumns">Parent ID column and other related object ID column in the binding object</param>
     /// <param name="create">If true, bindings will not be retrieved from database. Otherwise only if the binding has own ID column.</param>
-    private IEnumerable<BaseInfo> GetBindings(string changedItems, string parentColumn, string targetColumn, bool create)
+    private IEnumerable<BaseInfo> GetBindings(string changedItems, Tuple<string, string> bindingColumns, bool create)
     {
         var bindingsToProcess = Enumerable.Empty<BaseInfo>();
 
@@ -412,14 +444,14 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
 
                 if (create || bindingTypeInfo.IDColumn == ObjectTypeInfo.COLUMN_NAME_UNKNOWN)
                 {
-                    bindingsToProcess = CreateBindings(items, parentColumn, targetColumn);
+                    bindingsToProcess = CreateBindings(items, bindingColumns);
                 }
-                else 
+                else
                 {
                     // If binding has object ID column, retrieve all changed objects by single query
                     bindingsToProcess = new ObjectQuery(BindingObjectType, false)
-                        .WhereEquals(parentColumn, ObjectID)
-                        .WhereIn(targetColumn, items);
+                        .WhereEquals(bindingColumns.Item1, ObjectID)
+                        .WhereIn(bindingColumns.Item2, items);
                 }
             }
         }
@@ -428,14 +460,14 @@ public partial class CMSModules_AdminControls_Controls_UIControls_BindingEditIte
     }
 
 
-    private IEnumerable<BaseInfo> CreateBindings(IEnumerable<string> targetIds, string parentColumn, string targetColumn)
+    private IEnumerable<BaseInfo> CreateBindings(IEnumerable<string> targetIds, Tuple<string, string> bindingColumns)
     {
         foreach(var item in targetIds)
         {
             var bi = ModuleManager.GetObject(BindingObjectType);
 
-            bi.SetValue(parentColumn, ObjectID);
-            bi.SetValue(targetColumn, ValidationHelper.GetInteger(item, 0));
+            bi.SetValue(bindingColumns.Item1, ObjectID);
+            bi.SetValue(bindingColumns.Item2, ValidationHelper.GetInteger(item, 0));
 
             yield return bi;
         }
