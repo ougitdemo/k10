@@ -317,9 +317,9 @@ function advancedModal(url, name, width, height, otherParams, noWopener, forceMo
                 }
             }
         })
-    .width(size.width)
-    .height(size.height)
-    .css('padding', 0);
+        .width(size.width)
+        .height(size.height)
+        .css('padding', 0);
 
         // Get current offset and dimensions
         var dialogElem = $visiblePopup.parent();
@@ -335,6 +335,10 @@ function advancedModal(url, name, width, height, otherParams, noWopener, forceMo
         // Add cms-bootstrap css class to support
         // loader styles in on-site editing dialogs
         dialogElem.addClass('cms-bootstrap');
+
+        // Add a CMS specific class to the dialog overlay to be able to set specific styles only to the CMS overlays
+        // This way we avoid collisions between CMS and customers' jQuery-UI styles
+        $cmsj('.ui-widget-overlay').addClass('cms-ui-widget-overlay');
 
         // Ensure closing by clicking on background overlay
         // Currently enabled only till dialog successfully loads, after that user should use close button

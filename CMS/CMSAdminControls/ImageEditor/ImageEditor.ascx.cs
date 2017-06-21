@@ -597,7 +597,7 @@ public partial class CMSAdminControls_ImageEditor_ImageEditor : CMSUserControl
             case ImageHelper.ImageTypeEnum.PhysicalFile:
                 if (!String.IsNullOrEmpty(filePath))
                 {
-                    if (CheckPhysicalFilePermissions())
+                    if (!CheckPhysicalFilePermissions())
                     {
                         ReportSavingNotAuthorized();
                         return;

@@ -84,7 +84,7 @@ public partial class CMSModules_ImportExport_Controls_ImportSiteDetails : CMSUse
     {
         get
         {
-            return DataHelper.GetNotEmpty(cultureElem.Value, SettingsKeyInfoProvider.GetValue("CMSDefaultCultureCode"));
+            return DataHelper.GetNotEmpty(cultureElem.Value, DataHelper.GetNotEmpty(SettingsKeyInfoProvider.GetValue("CMSDefaultCultureCode"), CultureHelper.DefaultUICultureCode));
         }
         set
         {

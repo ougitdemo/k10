@@ -1538,6 +1538,10 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_FieldEd
                         FormCategoryInfo formCategory = ((FormCategoryInfo)(item));
 
                         itemDisplayName = ResHelper.LocalizeString(formCategory.GetPropertyValue(FormCategoryPropertyEnum.Caption, resolver));
+                        if (String.IsNullOrEmpty(itemDisplayName))
+                        {
+                            itemDisplayName = formCategory.CategoryName;
+                        }
                         itemCodeName = categPreffix + formCategory.CategoryName;
                     }
 
@@ -3572,12 +3576,29 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_FieldEd
         categoryEdit.CategoryInfo = updatedCategoryInfo;
         categoryEdit.Save();
 
-        if (String.IsNullOrEmpty(updatedCategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.Caption)))
+        bool captionIsMacro;
+        var caption = updatedCategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.Caption, out captionIsMacro);
+
+        if (String.IsNullOrEmpty(caption))
         {
             return GetString("TemplateDesigner.ErrorCategoryNameEmpty");
         }
 
-        updatedCategoryInfo.CategoryName = IsNewItemEdited ? ValidationHelper.GetCodeName(updatedCategoryInfo.GetPropertyValue(FormCategoryPropertyEnum.Caption)) : fci.CategoryName;
+        if (IsNewItemEdited)
+        {
+            if (captionIsMacro && !MacroProcessor.IsLocalizationMacro(caption))
+            {
+                updatedCategoryInfo.CategoryName = GenerateCategoryName();
+            }
+            else
+            {
+                updatedCategoryInfo.CategoryName = ValidationHelper.GetCodeName(caption);
+            }
+        }
+        else
+        {
+            updatedCategoryInfo.CategoryName = fci.CategoryName;
+        }
 
         if ((IsNewItemEdited || updatedCategoryInfo.CategoryName != fci.CategoryName) && FormInfo.GetCategoryNames().Exists(x => x == updatedCategoryInfo.CategoryName))
         {
@@ -3597,6 +3618,24 @@ public partial class CMSModules_AdminControls_Controls_Class_FieldEditor_FieldEd
 
         // No error occurred
         return null;
+    }
+
+
+    private string GenerateCategoryName()
+    {
+        var categoryNames = FormInfo.GetFields<FormCategoryInfo>()
+                                    .Where(x => !string.IsNullOrEmpty(x.CategoryName))
+                                    .Select(x => x.CategoryName)
+                                    .ToList();
+
+        var current = categoryNames.Count + 1;
+
+        while (categoryNames.Contains("Category_" + current, StringComparer.OrdinalIgnoreCase))
+        {
+            current++;
+        }
+
+        return "Category_" + current;
     }
 
 

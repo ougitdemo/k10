@@ -416,7 +416,7 @@ public partial class CMSModules_AdminControls_Controls_UIControls_Listing : CMSA
                 break;
         }
 
-        return sender;
+        return parameter;
     }
 
 

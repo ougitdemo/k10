@@ -2494,6 +2494,13 @@
             <param name="entitiesReplacement">Replacement for HTML entities</param>
             <param name="commentsReplacement">Replacement for HTML comments</param>
         </member>
+        <member name="M:CMS.Helpers.HTMLHelper.RemoveComments(System.String,System.String)">
+            <summary>
+            Remove HTML comments from given text.
+            </summary>
+            <param name="htmlText">HTML text</param>
+            <param name="commentsReplacement">Replacement for HTML comments</param>
+        </member>
         <member name="M:CMS.Helpers.HTMLHelper.MayContainEntities(System.String)">
             <summary>
             Returns true if the given text may contain HTML entities
@@ -11907,7 +11914,16 @@
             <param name="parameters">Callback parameters</param>
             <param name="rootNode">Name of the root node to check (if null not check is done)</param>
             <param name="updatedColumns">List of columns present in the xml (not all columns from DataSet have to be also in containing xml), this list is needed for update mode in CMSHierarchyHelper</param>
-            <param name="cultureName">Name of the culture to use for parsing double and datetime values; English culture is used if not specified</param>
+            <param name="cultureName">Name of the culture to use for parsing double, decimal, datetime and timespan values; English culture is used if not specified</param>
+        </member>
+        <member name="M:CMS.Helpers.DataHelper.ParseDecimalXmlValue(System.String,System.Globalization.CultureInfo,System.String,System.Boolean)">
+            <summary>
+            Parses the decimal XML value.
+            </summary>
+            <param name="value">Value to parse</param>
+            <param name="culture">Culture which determines the decimal format</param>
+            <param name="columnName">Name of the converting column</param>
+            <param name="isSystemCall">Indicates that the user has no impact on the format of the input value</param>
         </member>
         <member name="M:CMS.Helpers.DataHelper.EnsureTableColumn(System.Data.DataTable,System.String,System.Data.DataSet)">
             <summary>

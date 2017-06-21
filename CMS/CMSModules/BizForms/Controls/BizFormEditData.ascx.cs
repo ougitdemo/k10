@@ -17,6 +17,7 @@ using CMS.SiteProvider;
 using CMS.UIControls;
 using CMS.UIControls.UniGridConfig;
 
+using Action = CMS.UIControls.UniGridConfig.Action;
 
 public partial class CMSModules_BizForms_Controls_BizFormEditData : CMSAdminEditControl
 {
@@ -232,13 +233,6 @@ public partial class CMSModules_BizForms_Controls_BizFormEditData : CMSAdminEdit
                         }
                     }
                     break;
-
-                case "delete":
-                    if (button != null)
-                    {
-                        button.CommandArgument = Convert.ToString(drv[primaryColumn]);
-                    }
-                    break;
             }
         }
 
@@ -250,13 +244,18 @@ public partial class CMSModules_BizForms_Controls_BizFormEditData : CMSAdminEdit
     {
         if ((bfi != null) && (FormInfo != null))
         {
+            // Update the actions command argument
+            foreach (Action action in gridData.GridActions.Actions)
+            {
+                action.CommandArgument = primaryColumn;
+            }
+
             // Get existing columns names
             var columnList = GetExistingColumns();
 
             string columns = bfi.FormReportFields;
             if (!string.IsNullOrEmpty(columns))
             {
-                // Get selected columns
                 var selectedColumns = GetSelectedColumns(columns);
 
                 columnList = columnList.Intersect(selectedColumns, StringComparer.InvariantCultureIgnoreCase).ToList();

@@ -129,9 +129,9 @@ function MoveWebPartAsync(properties, targetZoneId, targetPosition, elem) {
                     alert(values[1]);
                     RefreshPage();
                     break;
-                case 'CK':
-                    if (typeof (CKRenameWidgetTextareas) == 'function') {
-                        CKRenameWidgetTextareas(values[1], values[2]);
+                case 'UPDATE_IDS':
+                    if (typeof (UpdateWidgetInputElementIdentifiers) == 'function') {
+                        UpdateWidgetInputElementIdentifiers(values[1], values[2]);
                     }
                     break;
             }

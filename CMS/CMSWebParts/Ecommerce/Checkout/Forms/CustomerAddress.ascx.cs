@@ -343,9 +343,11 @@ public partial class CMSWebParts_Ecommerce_Checkout_Forms_CustomerAddress : CMSC
                 // Assign validated new address to the current shopping cart 
                 // Address will be saved by customer detail web part (existing customer object is needed for the address)
                 CurrentCartAddress = address;
-                ClearShippingAddress();
             }
         }
+        
+        // Clear shipping address (StopProcessing is true when chkShowAddress is cleared)
+        ClearShippingAddress();
     }
 
     #endregion

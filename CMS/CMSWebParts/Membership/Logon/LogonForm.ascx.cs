@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Text;
 using System.Web;
 using System.Web.Security;
@@ -611,7 +612,16 @@ function UpdateLabel_", ClientID, @"(content, context) {
         }
         else
         {
-            e.Authenticated = Membership.Provider.ValidateUser(Login1.UserName, Login1.Password);
+            try
+            {
+                e.Authenticated = Membership.Provider.ValidateUser(Login1.UserName, Login1.Password);
+            }
+            catch (ConfigurationException ex)
+            {
+                EventLogProvider.LogException("LogonForm", "VALIDATEUSER", ex);
+                var provider = new CMSMembershipProvider();
+                e.Authenticated = provider.ValidateUser(Login1.UserName, Login1.Password);
+            }
         }
     }
 

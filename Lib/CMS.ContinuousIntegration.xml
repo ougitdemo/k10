@@ -632,6 +632,28 @@
             </summary>
             <returns>Configuration part with excluded object types as a string</returns>
         </member>
+        <member name="M:CMS.ContinuousIntegration.EncodingConfiguration.CreateEncoding(System.String)">
+            <summary>
+            Gets encoding according to <paramref name="encodingName"/>.
+            </summary>
+            <exception cref="T:CMS.ContinuousIntegration.RepositoryConfigurationException">Thrown when <paramref name="encodingName"/> does not represent a valid encoding name.</exception>
+        </member>
+        <member name="P:CMS.ContinuousIntegration.EncodingConfiguration.DefaultEncoding">
+            <summary>
+            Gets encoding to be used when no <see cref="P:CMS.ContinuousIntegration.EncodingConfiguration.EncodingName"/> is provided.
+            </summary>
+        </member>
+        <member name="P:CMS.ContinuousIntegration.EncodingConfiguration.EncodingName">
+            <summary>
+            Gets encoding name specified in the application's configuration, if provided.
+            </summary>
+        </member>
+        <member name="P:CMS.ContinuousIntegration.EncodingConfiguration.Encoding">
+            <summary>
+            Gets encoding to be used for repository files content.
+            </summary>
+            <exception cref="T:CMS.ContinuousIntegration.RepositoryConfigurationException">Thrown when <see cref="P:CMS.ContinuousIntegration.EncodingConfiguration.EncodingName"/> does not represent a valid encoding name.</exception>
+        </member>
         <member name="T:CMS.ContinuousIntegration.Internal.AbstractFileSystemAllJob">
             <summary>
             Abstract class incorporating behavior same for all all-jobs.
@@ -2775,6 +2797,11 @@
             Delimiter between parts of shortened file name.
             </summary>
         </member>
+        <member name="F:CMS.ContinuousIntegration.FileSystemRepositoryHelper.RESERVED_FILE_SYSTEM_NAME_PREFIX_DELIMITER">
+            <summary>
+            Delimiting character which, when delimiting a reserved file system name prefix, results in an invalid file system name.
+            </summary>
+        </member>
         <member name="F:CMS.ContinuousIntegration.FileSystemRepositoryHelper.RESERVED_FILE_SYSTEM_NAMES">
             <summary>
             File names which are not to be used (regardless of extension).
@@ -2972,6 +2999,17 @@
             </para>
             </remarks>
         </member>
+        <member name="M:CMS.ContinuousIntegration.FileSystemRepositoryHelper.ReplaceReservedPrefix(System.String)">
+            <summary>
+            Searches for occurrence of one of <see cref="F:CMS.ContinuousIntegration.FileSystemRepositoryHelper.RESERVED_FILE_SYSTEM_NAMES"/> as a prefix in <paramref name="name"/>, delimited by a '.' (dot) character.
+            If such prefix is found, the delimiter is replaced by '-' (dash) (e.g. 'com1.something' is replaced by 'com1-something).
+            </summary>
+        </member>
+        <member name="M:CMS.ContinuousIntegration.FileSystemRepositoryHelper.ReplaceAt(System.String,System.Int32,System.Char)">
+            <summary>
+            Replaces character at position specified by <paramref name="index"/> in a string. No boundary check is performed.
+            </summary>
+        </member>
         <member name="M:CMS.ContinuousIntegration.FileSystemRepositoryHelper.ComputeFileNameHash(System.String,System.Int32)">
             <summary>
             Computes hash from <paramref name="value"/> and truncates it to meet <paramref name="hashLength"/>.
@@ -2988,9 +3026,9 @@
             <param name="data">Byte array for which to compute the hash.</param>
             <returns>Hash bytes compute from given byte array.</returns>
         </member>
-        <member name="M:CMS.ContinuousIntegration.FileSystemRepositoryHelper.CreateFileSystemSafeNameForName(System.String)">
+        <member name="M:CMS.ContinuousIntegration.FileSystemRepositoryHelper.ReplaceUnsafeFileSystemCharacters(System.String)">
             <summary>
-            Creates file system safe name for given name.
+            Transforms <paramref name="name"/> to a string which does not contain any illegal or possibly problematic file system characters while maintaining human readability.
             </summary>
             <param name="name">Name for which to create file system safe name.</param>
             <returns>File system safe name.</returns>
@@ -3978,6 +4016,18 @@
             <param name="relativePath">Relative path to the file.</param>
             <param name="hashAlgorithm">Hash algorithm that is used by CryptoStream.</param>
             <returns>CryptoStream for writing to the file with given relative path.</returns>
+        </member>
+        <member name="M:CMS.ContinuousIntegration.FileSystemWriter.WriteFormattedXmlToStream(System.Xml.XmlDocument,System.IO.Stream,System.Text.Encoding)">
+            <summary>
+            Writes formatted XML content to given stream.
+            </summary>
+            <remarks>
+            Ensures indentation and line breaking after each element.
+            </remarks>
+            <param name="document">XML document</param>
+            <param name="stream">The stream to write to.</param>
+            <param name="encoding">Encoding to be used when writing the content to stream.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="document"/> is null.</exception>
         </member>
         <member name="T:CMS.ContinuousIntegration.Internal.FileSystemDeleteJobFactory">
             <summary>

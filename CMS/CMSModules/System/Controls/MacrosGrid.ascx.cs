@@ -266,18 +266,20 @@ public partial class CMSModules_System_Controls_MacrosGrid : CMSUserControl, IUn
                 {
                     // Get original macro text with hash
                     string macroType;
-                    string expression = MacroProcessor.RemoveMacroBrackets(context.GetOriginalExpression(), out macroType);
+                    string originalExpression = MacroProcessor.RemoveMacroBrackets(context.GetOriginalExpression(), out macroType);
+                    string processedExpression = context.Expression;
 
                     // Decode macro from XML if needed
                     if (MacroProcessor.IsXMLColumn(colName))
                     {
-                        expression = HTMLHelper.HTMLDecode(expression);
+                        originalExpression = HTMLHelper.HTMLDecode(originalExpression);
+                        processedExpression = HTMLHelper.HTMLDecode(processedExpression);
                     }
 
                     MacroExpr e = null;
                     bool add = false;
 
-                    if (!searchByText || (expression.IndexOfCSafe(textToSearch, true) >= 0))
+                    if (!searchByText || (originalExpression.IndexOfCSafe(textToSearch, true) >= 0))
                     {
                         // If not tracking errors, count immediately
                         if (!reportProblems)
@@ -285,7 +287,7 @@ public partial class CMSModules_System_Controls_MacrosGrid : CMSUserControl, IUn
                             // Apply paging. (endIndex is -1 when paging is off)
                             if ((endIndex < 0) || ((index >= startIndex) && (index <= endIndex)))
                             {
-                                e = GetMacroExpr(expression);
+                                e = GetMacroExpr(originalExpression, processedExpression);
                                 add = true;
                             }
 
@@ -293,7 +295,7 @@ public partial class CMSModules_System_Controls_MacrosGrid : CMSUserControl, IUn
                         }
                         else
                         {
-                            e = GetMacroExpr(expression);
+                            e = GetMacroExpr(originalExpression, processedExpression);
 
                             // Filter invalid signature / syntax
                             var pass = !e.SignatureValid || e.Error;
@@ -424,20 +426,28 @@ public partial class CMSModules_System_Controls_MacrosGrid : CMSUserControl, IUn
     /// <summary>
     /// Gets the macro expression from the given object
     /// </summary>
-    /// <param name="expression">Expression</param>
-    private static MacroExpr GetMacroExpr(string expression)
+    private static MacroExpr GetMacroExpr(string originalExpression, string processedExpression)
     {
         var macroExpr = new MacroExpr();
 
         try
         {
             // Handle security
-            macroExpr.Expression = MacroSecurityProcessor.RemoveMacroSecurityParams(expression, out macroExpr.SignedBy);
-            macroExpr.SignatureValid = MacroSecurityProcessor.CheckMacroIntegrity(expression, macroExpr.SignedBy);
+            macroExpr.Expression = MacroSecurityProcessor.RemoveMacroSecurityParams(originalExpression, out macroExpr.SignedBy);
+            macroExpr.SignatureValid = MacroSecurityProcessor.CheckMacroIntegrity(originalExpression, macroExpr.SignedBy);
 
             // Parse rule text
             macroExpr.RuleText = MacroRuleTree.GetRuleText(macroExpr.Expression, true, true);
             macroExpr.Expression = MacroRuleTree.GetRuleCondition(macroExpr.Expression, true);
+
+            // Macro expression does not support anonymous signature, remove the flag
+            if (processedExpression.EndsWith("@", StringComparison.Ordinal))
+            {
+                processedExpression = processedExpression.Substring(0, processedExpression.Length - 1);
+            }
+
+            // Check syntax
+            MacroExpression.ParseExpression(processedExpression);
         }
         catch (Exception ex)
         {

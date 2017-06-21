@@ -1550,7 +1550,8 @@
         </member>
         <member name="M:CMS.Automation.AutomationStateInfoProvider.BulkInsertAutomationState(System.Collections.Generic.IEnumerable{CMS.Automation.AutomationStateInfo})">
             <summary>
-            Inserts all automation states given by <paramref name="states" /> collection into database
+            Inserts all automation states given by <paramref name="states"/> collection into database.
+            <see cref="P:CMS.Automation.AutomationStateInfo.StateCreated"/> will be set to the insertion time.
             </summary>
             <param name="states">Collection of automation states to insert into database</param>
         </member>

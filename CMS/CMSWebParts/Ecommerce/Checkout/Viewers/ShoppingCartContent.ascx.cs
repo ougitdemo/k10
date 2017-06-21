@@ -314,14 +314,10 @@ public partial class CMSWebParts_Ecommerce_Checkout_Viewers_ShoppingCartContent 
 
     /// <summary>
     /// Creates a new shopping cart record and corresponding shopping cart items records in the database 
-    /// as a copy of given shopping cart info. 
-    /// Currency is set according to the currency of given cart.
+    /// as a copy of given shopping cart info.
+    /// Currency is set according to the currency of the given cart.
     /// If a configuration of cart item is no longer available it is not cloned to new shopping cart.
-    /// Correct user id for logged user is _not_ handled in this method, because it does not depend on 
-    /// abandoned cart's user id. It should be handled according to user's status (logged in/anonymous)
-    /// in the browser where the cart is loaded: 
-    ///  - anonymous cart or user's cart opened in the browser where user is logged in - new cart userId should be set to logged user's id
-    ///  - anonymous cart or user's cart opened in the browser where user is _not_ logged in - new cart userId should be empty (anonymous cart)
+    /// <see cref="AbstractUserControl.CurrentUser"/> is set as the new cart owner (only non-public user is set).
     /// </summary>
     /// <param name="originalCart">Original cart to clone.</param>
     /// <returns>Created shopping cart info.</returns>
@@ -329,7 +325,7 @@ public partial class CMSWebParts_Ecommerce_Checkout_Viewers_ShoppingCartContent 
     {
         using (new CMSActionContext { UpdateTimeStamp = false })
         {
-            ShoppingCartInfo cartClone = ShoppingCartFactory.CreateCart(CurrentSite.SiteID, originalCart.User);
+            var cartClone = ShoppingCartFactory.CreateCart(CurrentSite.SiteID, CurrentUser.IsPublic() ? null : CurrentUser);
 
             cartClone.ShoppingCartCurrencyID = originalCart.ShoppingCartCurrencyID;
             cartClone.ShoppingCartLastUpdate = originalCart.ShoppingCartLastUpdate;
@@ -338,10 +334,7 @@ public partial class CMSWebParts_Ecommerce_Checkout_Viewers_ShoppingCartContent 
             ShoppingCartInfoProvider.CopyShoppingCartItems(originalCart, cartClone);
 
             // Set the shopping cart items into the database
-            foreach (ShoppingCartItemInfo item in cartClone.CartItems)
-            {
-                ShoppingCartItemInfoProvider.SetShoppingCartItemInfo(item);
-            }
+            cartClone.CartItems.ForEach(i => i.Generalized.SetObject());
 
             return cartClone;
         }

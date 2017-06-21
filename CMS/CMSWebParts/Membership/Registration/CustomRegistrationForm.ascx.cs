@@ -544,8 +544,8 @@ public partial class CMSWebParts_Membership_Registration_CustomRegistrationForm 
 
                 formUser.OnAfterSave += formUser_OnAfterSave;
 
-                // Reload form if not in PortalEngine environment and if post back
-                if ((StandAlone) && (RequestHelper.IsPostBack()))
+                // Reload form if not in PortalEngine environment
+                if (StandAlone)
                 {
                     formUser.ReloadData();
                 }

@@ -460,11 +460,11 @@ function ProcessItem(chkbox, hash, changeChecked, getHash) {
             var re = new RegExp('", regexEscapedValuesSeparator, @"' + item + '", regexEscapedValuesSeparator, @"', 'i');
             itemsElem.value = items.replace(re, ", scriptValuesSeparator, @");
         }
-        checkHash = '|' + item + '#' + hash;
+        checkHash = '|' + item + '#' + hash + '##' + items + '#' + HashElem().value;
     }
     else
     {
-        checkHash = '|' + items + '#' + hash;
+        checkHash = '|' + hash;
     }
     if (getHash) {
         ", Page.ClientScript.GetCallbackEventReference(this, "itemsElem.value + checkHash", "SetHash", null), @";
@@ -475,22 +475,29 @@ function Cancel() { CloseDialog(); }
 
 function SelectAllItems(checkbox, hash) {
     var itemsElem = ItemsElem();
-    itemsElem.value = '';
-    SetHash('", ValidationHelper.GetHashString(""), @"');
+    var hashElem = HashElem();
+
+    var origItems = itemsElem.value;
+    var origHash = hashElem.value;
+
+    var pageItems = ", scriptValuesSeparator, @";
+
     var checkboxes = document.getElementsByClassName('chckbox');
     var checked = checkbox.checked;
+
     for(var i = 0; i < checkboxes.length; i++) {
         var chkbox = checkboxes[i];
-
         chkbox.checked = checked;
 
-        if (checked) {
-            ProcessItem(chkbox, null, false, false);
-        }
+        var item = chkbox.id.substr(3);
+        pageItems += item + ", scriptValuesSeparator, @";
+
+        ProcessItem(chkbox, null, false, false);
     }
-    if (checked) {
-        ProcessItem(null, hash, false, true);
-    }
+
+    var checkHash = pageItems + '#' + hash + '##' + origItems + '#' + origHash;
+
+    ProcessItem(null, checkHash, false, true);
 }");
 
         ltlScript.Text = ScriptHelper.GetScript(script + sb + buttonsScript);
@@ -1347,14 +1354,17 @@ function SelectAllItems(checkbox, hash) {
         if (!string.IsNullOrEmpty(callbackValues))
         {
             // All selected items | newly added item(s) # hash of the new item(s)
-            var paramFormat = new Regex(String.Format(@"^(?<items>{0}(.*{0})?)\|(?<values>({0}.*{0})|([^{0}]*))#(?<hash>.*)$", Regex.Escape(valuesSeparator.ToString())));
+            var paramFormat = new Regex(String.Format(@"^(?<items>{0}(.*{0})?)\|(?<values>({0}[^#]*{0})|([^{0}#]*))#(?<hash>[^#]*)##(?<oldValues>(({0}.*{0})?|{0}))#(?<oldHash>.*)$", Regex.Escape(valuesSeparator.ToString())));
             var paramMatch = paramFormat.Match(callbackValues);
             if (paramMatch.Success)
             {
                 string value = paramMatch.Groups["values"].Value.Trim(valuesSeparator);
                 string hash = paramMatch.Groups["hash"].Value;
+                string oldValue = paramMatch.Groups["oldValues"].Value;
+                string oldHash = paramMatch.Groups["oldHash"].Value;
 
-                if (ValidationHelper.ValidateHash(value, hash, new HashSettings { Redirect = false }))
+                // Check hash for newly selected item(s) and the previous selection
+                if (ValidationHelper.ValidateHash(value, hash, new HashSettings { Redirect = false }) && ValidationHelper.ValidateHash(oldValue, oldHash, new HashSettings { Redirect = false }))
                 {
                     // Get new hash for currently selected items
                     result = ValidationHelper.GetHashString(paramMatch.Groups["items"].Value);

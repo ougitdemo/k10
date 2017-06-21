@@ -1383,6 +1383,11 @@
             </summary>
             <param name="dr">DataRow with the object data.</param>
         </member>
+        <member name="M:CMS.Ecommerce.CouponCodeInfo.LoadDefaultData">
+            <summary>
+            Loads the default object data.
+            </summary>
+        </member>
         <member name="M:CMS.Ecommerce.CouponCodeInfo.CheckUniqueCodeName">
             <summary>
             Checks if the object has unique code name. Returns true if the object has unique code name.
@@ -1615,6 +1620,11 @@
             Constructor - Creates a new MultiBuyCouponCodeInfo object from the given DataRow.
             </summary>
             <param name="dr">DataRow with the object data</param>
+        </member>
+        <member name="M:CMS.Ecommerce.MultiBuyCouponCodeInfo.LoadDefaultData">
+            <summary>
+            Loads the default object data.
+            </summary>
         </member>
         <member name="M:CMS.Ecommerce.MultiBuyCouponCodeInfo.CheckUniqueCodeName">
             <summary>
@@ -15996,6 +16006,11 @@
         <member name="M:CMS.Ecommerce.ShoppingCartItemInfo.RegisterProperties">
             <summary>
             Registers the properties of this object
+            </summary>
+        </member>
+        <member name="M:CMS.Ecommerce.ShoppingCartItemInfo.GetParent">
+            <summary>
+            Returns the parent object.
             </summary>
         </member>
         <member name="P:CMS.Ecommerce.ShoppingCartItemInfo.CartItemID">

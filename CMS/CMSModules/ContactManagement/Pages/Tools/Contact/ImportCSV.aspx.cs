@@ -307,11 +307,16 @@ public partial class CMSModules_ContactManagement_Pages_Tools_Contact_ImportCSV 
                 DisplayName = ResHelper.LocalizeString(formField.GetDisplayName(MacroResolver.GetInstance()))
             });
 
-            string categoryName = string.IsNullOrEmpty(category.Key.CategoryName) ? GetString("om.contact.importcsv.nofieldcategory") : ResHelper.LocalizeString(category.Key.GetPropertyValue(FormCategoryPropertyEnum.Caption, MacroResolver.GetInstance()));
+            string categoryCaption = ResHelper.LocalizeString(category.Key.GetPropertyValue(FormCategoryPropertyEnum.Caption, MacroResolver.GetInstance()));
 
+            if (String.IsNullOrEmpty(categoryCaption))
+            {
+                categoryCaption = GetString("om.contact.importcsv.nofieldcategory");
+            }
+          
             categoriesList.Add(new
             {
-                CategoryName = categoryName,
+                CategoryName = categoryCaption,
                 CategoryMembers = categoryMembers
             });
         }

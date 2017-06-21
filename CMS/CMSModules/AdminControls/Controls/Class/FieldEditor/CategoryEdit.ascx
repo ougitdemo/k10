@@ -6,11 +6,11 @@
     <div class="form-horizontal">
         <div class="form-group">
             <div class="editing-form-label-cell">
-                <cms:LocalizedLabel CssClass="control-label" ID="lblCategoryName" runat="server" EnableViewState="false"
-                    ResourceString="TemplateDesigner.CategoryName" />
+                <cms:LocalizedLabel CssClass="control-label" ID="lblCategoryCaption" runat="server" EnableViewState="false"
+                                    ResourceString="TemplateDesigner.CategoryName" ShowRequiredMark="true" />
             </div>
             <div class="editing-form-value-cell">
-                <cms:EditingFormControl ID="txtCategoryName" runat="server" AllowMacroEditing="true" FormControlName="LocalizableTextBox" />
+                <cms:EditingFormControl ID="txtCategoryCaption" runat="server" AllowMacroEditing="true" FormControlName="LocalizableTextBox" />
             </div>
         </div>
         <div class="form-group">
